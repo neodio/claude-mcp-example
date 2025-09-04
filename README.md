@@ -7,7 +7,8 @@
    - https://claude.ai/download
 2. IntelliJ IDEA
    - https://www.jetbrains.com/ko-kr/idea/download/other.html
-   - 메모리 사용을 많이하여 IntelliJ IDEA 설정 필요 
+   - 2025.1 버전 사용 (최신 버전 2025.2는 메모리 폭주 버그 있음)
+   - 메모리 사용을 많이하여 IntelliJ IDEA 설정 필요
 3. MCP jetbrains
    - https://github.com/JetBrains/mcp-jetbrains
 

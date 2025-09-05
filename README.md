@@ -1,4 +1,5 @@
 # IntelliJ IDEA + claude MCP 예제 프로젝트
+ - 인프런 교육 실습 자료
 
 ## 사전 준비
 1. node.js 설치
@@ -8,7 +9,6 @@
 2. IntelliJ IDEA
    - https://www.jetbrains.com/ko-kr/idea/download/other.html
    - 2025.1 버전 사용 (최신 버전 2025.2는 메모리 폭주 버그 있음)
-   - 메모리 사용을 많이하여 IntelliJ IDEA 설정 필요
 3. MCP jetbrains
    - https://github.com/JetBrains/mcp-jetbrains
 
@@ -52,7 +52,7 @@ MCP는 "대규모 언어 모델이 외부 데이터와 시스템을 더 효과�
 <img src="image/figma.png"  width="750"/><br>
 
 
-## 실전 Claude + IntelliJ MCP로 연동 후 투두 리스트 만들기
+## 실전 Claude + IntelliJ MCP로 연동 후 Todo 리스트 만들기
 
 ### ✅ 1단계. 투두 리스트 CRUD 서버 개발 (Spring Boot + JPA + H2)
 
@@ -135,3 +135,6 @@ Claude 에게 시킬 프롬포트
 - 로그인된 유저의 닉네임을 list.html에 출력해줘
 - 로그인하지 않은 사용자가 /todos 등에 접근하면 /login으로 리다이렉트
 ```
+
+# 강의자료 참고
+- [강의 링크](https://www.inflearn.com/course/claude-intellij-mcp%EC%A0%95%EB%B3%B5)

@@ -1,24 +1,19 @@
 package com.claude.dto;
 
-import jakarta.validation.constraints.NotBlank;
-
-public class TodoCreateRequest {
-    
-    @NotBlank(message = "Title is required")
+public class TodoCreateDto {
     private String title;
-    
     private String description;
     
     // 기본 생성자
-    public TodoCreateRequest() {}
+    public TodoCreateDto() {}
     
     // 생성자
-    public TodoCreateRequest(String title, String description) {
+    public TodoCreateDto(String title, String description) {
         this.title = title;
         this.description = description;
     }
     
-    // Getters and Setters
+    // Getter & Setter
     public String getTitle() {
         return title;
     }

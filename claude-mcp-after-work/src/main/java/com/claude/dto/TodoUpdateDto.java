@@ -1,27 +1,21 @@
 package com.claude.dto;
 
-import jakarta.validation.constraints.NotBlank;
-
-public class TodoUpdateRequest {
-    
-    @NotBlank(message = "Title is required")
+public class TodoUpdateDto {
     private String title;
-    
     private String description;
-    
     private Boolean isDone;
     
     // 기본 생성자
-    public TodoUpdateRequest() {}
+    public TodoUpdateDto() {}
     
     // 생성자
-    public TodoUpdateRequest(String title, String description, Boolean isDone) {
+    public TodoUpdateDto(String title, String description, Boolean isDone) {
         this.title = title;
         this.description = description;
         this.isDone = isDone;
     }
     
-    // Getters and Setters
+    // Getter & Setter
     public String getTitle() {
         return title;
     }

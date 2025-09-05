@@ -1,10 +1,9 @@
 package com.claude.controller;
 
-import com.claude.dto.TodoCreateRequest;
-import com.claude.dto.TodoResponse;
-import com.claude.dto.TodoUpdateRequest;
+import com.claude.dto.TodoCreateDto;
+import com.claude.dto.TodoResponseDto;
+import com.claude.dto.TodoUpdateDto;
 import com.claude.service.TodoService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,38 +22,54 @@ public class TodoController {
         this.todoService = todoService;
     }
     
-    // 투두 생성 (POST /api/todos)
+    // 투두 생성
     @PostMapping
-    public ResponseEntity<TodoResponse> createTodo(@Valid @RequestBody TodoCreateRequest request) {
-        TodoResponse response = todoService.createTodo(request);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public ResponseEntity<TodoResponseDto> createTodo(@RequestBody TodoCreateDto createDto) {
+        try {
+            TodoResponseDto createdTodo = todoService.createTodo(createDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdTodo);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     
-    // 전체 투두 조회 (GET /api/todos)
+    // 전체 투두 조회
     @GetMapping
-    public ResponseEntity<List<TodoResponse>> getAllTodos() {
-        List<TodoResponse> todos = todoService.getAllTodos();
+    public ResponseEntity<List<TodoResponseDto>> getAllTodos() {
+        List<TodoResponseDto> todos = todoService.getAllTodos();
         return ResponseEntity.ok(todos);
     }
     
-    // 단건 투두 조회 (GET /api/todos/{id})
+    // 단건 투두 조회
     @GetMapping("/{id}")
-    public ResponseEntity<TodoResponse> getTodoById(@PathVariable Long id) {
-        TodoResponse todo = todoService.getTodoById(id);
-        return ResponseEntity.ok(todo);
+    public ResponseEntity<TodoResponseDto> getTodoById(@PathVariable Long id) {
+        try {
+            TodoResponseDto todo = todoService.getTodoById(id);
+            return ResponseEntity.ok(todo);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
     
-    // 투두 수정 (PUT /api/todos/{id})
+    // 투두 수정
     @PutMapping("/{id}")
-    public ResponseEntity<TodoResponse> updateTodo(@PathVariable Long id, @Valid @RequestBody TodoUpdateRequest request) {
-        TodoResponse updatedTodo = todoService.updateTodo(id, request);
-        return ResponseEntity.ok(updatedTodo);
+    public ResponseEntity<TodoResponseDto> updateTodo(@PathVariable Long id, @RequestBody TodoUpdateDto updateDto) {
+        try {
+            TodoResponseDto updatedTodo = todoService.updateTodo(id, updateDto);
+            return ResponseEntity.ok(updatedTodo);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
     
-    // 투두 삭제 (DELETE /api/todos/{id})
+    // 투두 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTodo(@PathVariable Long id) {
-        todoService.deleteTodo(id);
-        return ResponseEntity.noContent().build();
+        try {
+            todoService.deleteTodo(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

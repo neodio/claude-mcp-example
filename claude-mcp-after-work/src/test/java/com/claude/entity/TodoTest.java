@@ -3,74 +3,76 @@ package com.claude.entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.time.LocalDateTime;
 
+import static org.assertj.core.api.Assertions.*;
+
+@DisplayName("Todo Entity 테스트")
 class TodoTest {
-
+    
     @Test
     @DisplayName("Todo 기본 생성자 테스트")
-    void defaultConstructor() {
+    void defaultConstructor_Test() {
         // when
         Todo todo = new Todo();
-
+        
         // then
-        assertNull(todo.getId());
-        assertNull(todo.getTitle());
-        assertNull(todo.getDescription());
-        assertNull(todo.getIsDone());
+        assertThat(todo.getId()).isNull();
+        assertThat(todo.getTitle()).isNull();
+        assertThat(todo.getDescription()).isNull();
+        assertThat(todo.getIsDone()).isFalse();
+        assertThat(todo.getCreatedAt()).isNotNull();
+        assertThat(todo.getCreatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
     }
-
+    
     @Test
-    @DisplayName("Todo 매개변수 생성자 테스트")
-    void parameterConstructor() {
+    @DisplayName("Todo 생성자 테스트")
+    void constructor_Test() {
         // when
         Todo todo = new Todo("Test Title", "Test Description");
-
+        
         // then
-        assertNull(todo.getId()); // ID는 아직 할당되지 않음
-        assertEquals("Test Title", todo.getTitle());
-        assertEquals("Test Description", todo.getDescription());
-        assertEquals(false, todo.getIsDone()); // 기본값 false
+        assertThat(todo.getTitle()).isEqualTo("Test Title");
+        assertThat(todo.getDescription()).isEqualTo("Test Description");
+        assertThat(todo.getIsDone()).isFalse();
+        assertThat(todo.getCreatedAt()).isNotNull();
+        assertThat(todo.getCreatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
     }
-
+    
     @Test
     @DisplayName("Todo Setter 테스트")
-    void setterTest() {
+    void setter_Test() {
         // given
         Todo todo = new Todo();
-
+        LocalDateTime createdAt = LocalDateTime.of(2024, 1, 1, 12, 0);
+        
         // when
         todo.setId(1L);
-        todo.setTitle("Updated Title");
-        todo.setDescription("Updated Description");
+        todo.setTitle("Test Title");
+        todo.setDescription("Test Description");
         todo.setIsDone(true);
-
+        todo.setCreatedAt(createdAt);
+        
         // then
-        assertEquals(1L, todo.getId());
-        assertEquals("Updated Title", todo.getTitle());
-        assertEquals("Updated Description", todo.getDescription());
-        assertEquals(true, todo.getIsDone());
+        assertThat(todo.getId()).isEqualTo(1L);
+        assertThat(todo.getTitle()).isEqualTo("Test Title");
+        assertThat(todo.getDescription()).isEqualTo("Test Description");
+        assertThat(todo.getIsDone()).isTrue();
+        assertThat(todo.getCreatedAt()).isEqualTo(createdAt);
     }
-
+    
     @Test
-    @DisplayName("Todo 필드 기본값 테스트")
-    void defaultValuesTest() {
+    @DisplayName("생성일자 자동 설정 테스트")
+    void createdAt_AutoSetting_Test() throws InterruptedException {
+        // given
+        LocalDateTime before = LocalDateTime.now();
+        Thread.sleep(1); // 시간 차이를 만들기 위해
+        
         // when
-        Todo todo = new Todo("Title", "Description");
-
+        Todo todo = new Todo("Test Title", "Test Description");
+        
         // then
-        assertEquals(false, todo.getIsDone()); // isDone 기본값은 false
-    }
-
-    @Test
-    @DisplayName("Todo null 값 처리 테스트")
-    void nullValuesTest() {
-        // when
-        Todo todo = new Todo(null, null);
-
-        // then
-        assertNull(todo.getTitle());
-        assertNull(todo.getDescription());
-        assertEquals(false, todo.getIsDone()); // isDone은 기본값 유지
+        assertThat(todo.getCreatedAt()).isAfter(before);
+        assertThat(todo.getCreatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
     }
 }

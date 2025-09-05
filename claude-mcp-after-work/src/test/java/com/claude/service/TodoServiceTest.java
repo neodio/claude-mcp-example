@@ -1,8 +1,8 @@
 package com.claude.service;
 
-import com.claude.dto.TodoCreateRequest;
-import com.claude.dto.TodoResponse;
-import com.claude.dto.TodoUpdateRequest;
+import com.claude.dto.TodoCreateDto;
+import com.claude.dto.TodoResponseDto;
+import com.claude.dto.TodoUpdateDto;
 import com.claude.entity.Todo;
 import com.claude.repository.TodoRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,165 +17,189 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("TodoService 테스트")
 class TodoServiceTest {
-
+    
     @Mock
     private TodoRepository todoRepository;
-
+    
     @InjectMocks
     private TodoService todoService;
-
-    private Todo mockTodo;
-    private TodoCreateRequest createRequest;
-    private TodoUpdateRequest updateRequest;
-
+    
+    private Todo testTodo;
+    private TodoCreateDto createDto;
+    private TodoUpdateDto updateDto;
+    
     @BeforeEach
     void setUp() {
-        mockTodo = new Todo("Test Title", "Test Description");
-        mockTodo.setId(1L);
+        testTodo = new Todo("Test Title", "Test Description");
+        testTodo.setId(1L);
         
-        createRequest = new TodoCreateRequest("New Todo", "New Description");
-        updateRequest = new TodoUpdateRequest("Updated Title", "Updated Description", true);
+        createDto = new TodoCreateDto("New Todo", "New Description");
+        updateDto = new TodoUpdateDto("Updated Title", "Updated Description", true);
     }
-
+    
     @Test
     @DisplayName("투두 생성 성공")
     void createTodo_Success() {
         // given
-        when(todoRepository.save(any(Todo.class))).thenReturn(mockTodo);
-
-        // when
-        TodoResponse response = todoService.createTodo(createRequest);
-
-        // then
-        assertNotNull(response);
-        assertEquals(mockTodo.getId(), response.getId());
-        assertEquals(mockTodo.getTitle(), response.getTitle());
-        assertEquals(mockTodo.getDescription(), response.getDescription());
-        assertEquals(mockTodo.getIsDone(), response.getIsDone());
+        when(todoRepository.save(any(Todo.class))).thenReturn(testTodo);
         
-        verify(todoRepository, times(1)).save(any(Todo.class));
+        // when
+        TodoResponseDto result = todoService.createTodo(createDto);
+        
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getTitle()).isEqualTo("Test Title");
+        assertThat(result.getDescription()).isEqualTo("Test Description");
+        assertThat(result.getIsDone()).isFalse();
+        
+        verify(todoRepository).save(any(Todo.class));
     }
-
+    
+    @Test
+    @DisplayName("투두 생성 실패 - 제목이 null")
+    void createTodo_Fail_TitleIsNull() {
+        // given
+        createDto.setTitle(null);
+        
+        // when & then
+        assertThatThrownBy(() -> todoService.createTodo(createDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Title is required");
+        
+        verify(todoRepository, never()).save(any(Todo.class));
+    }
+    
+    @Test
+    @DisplayName("투두 생성 실패 - 제목이 빈 문자열")
+    void createTodo_Fail_TitleIsEmpty() {
+        // given
+        createDto.setTitle("");
+        
+        // when & then
+        assertThatThrownBy(() -> todoService.createTodo(createDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Title is required");
+        
+        verify(todoRepository, never()).save(any(Todo.class));
+    }
+    
     @Test
     @DisplayName("전체 투두 조회 성공")
     void getAllTodos_Success() {
         // given
-        Todo todo1 = new Todo("Title 1", "Description 1");
-        todo1.setId(1L);
-        Todo todo2 = new Todo("Title 2", "Description 2");
+        Todo todo2 = new Todo("Second Todo", "Second Description");
         todo2.setId(2L);
         
-        List<Todo> mockTodos = Arrays.asList(todo1, todo2);
-        when(todoRepository.findAll()).thenReturn(mockTodos);
-
-        // when
-        List<TodoResponse> responses = todoService.getAllTodos();
-
-        // then
-        assertNotNull(responses);
-        assertEquals(2, responses.size());
-        assertEquals("Title 1", responses.get(0).getTitle());
-        assertEquals("Title 2", responses.get(1).getTitle());
+        List<Todo> todos = Arrays.asList(testTodo, todo2);
+        when(todoRepository.findAll()).thenReturn(todos);
         
-        verify(todoRepository, times(1)).findAll();
+        // when
+        List<TodoResponseDto> result = todoService.getAllTodos();
+        
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getTitle()).isEqualTo("Test Title");
+        assertThat(result.get(1).getTitle()).isEqualTo("Second Todo");
+        
+        verify(todoRepository).findAll();
     }
-
+    
     @Test
-    @DisplayName("ID로 투두 조회 성공")
+    @DisplayName("단건 투두 조회 성공")
     void getTodoById_Success() {
         // given
-        when(todoRepository.findById(1L)).thenReturn(Optional.of(mockTodo));
-
+        when(todoRepository.findById(1L)).thenReturn(Optional.of(testTodo));
+        
         // when
-        TodoResponse response = todoService.getTodoById(1L);
-
+        TodoResponseDto result = todoService.getTodoById(1L);
+        
         // then
-        assertNotNull(response);
-        assertEquals(mockTodo.getId(), response.getId());
-        assertEquals(mockTodo.getTitle(), response.getTitle());
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getTitle()).isEqualTo("Test Title");
         
-        verify(todoRepository, times(1)).findById(1L);
+        verify(todoRepository).findById(1L);
     }
-
+    
     @Test
-    @DisplayName("ID로 투두 조회 실패 - 존재하지 않는 ID")
-    void getTodoById_NotFound() {
+    @DisplayName("단건 투두 조회 실패 - 존재하지 않는 ID")
+    void getTodoById_Fail_NotFound() {
         // given
-        when(todoRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> todoService.getTodoById(999L));
+        when(todoRepository.findById(999L)).thenReturn(Optional.empty());
         
-        assertEquals("Todo not found with id: 999", exception.getMessage());
-        verify(todoRepository, times(1)).findById(999L);
+        // when & then
+        assertThatThrownBy(() -> todoService.getTodoById(999L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Todo not found with id: 999");
+        
+        verify(todoRepository).findById(999L);
     }
-
+    
     @Test
     @DisplayName("투두 수정 성공")
     void updateTodo_Success() {
         // given
-        when(todoRepository.findById(1L)).thenReturn(Optional.of(mockTodo));
-        when(todoRepository.save(any(Todo.class))).thenReturn(mockTodo);
-
+        when(todoRepository.findById(1L)).thenReturn(Optional.of(testTodo));
+        when(todoRepository.save(any(Todo.class))).thenReturn(testTodo);
+        
         // when
-        TodoResponse response = todoService.updateTodo(1L, updateRequest);
-
+        TodoResponseDto result = todoService.updateTodo(1L, updateDto);
+        
         // then
-        assertNotNull(response);
-        verify(todoRepository, times(1)).findById(1L);
-        verify(todoRepository, times(1)).save(any(Todo.class));
+        assertThat(result).isNotNull();
+        verify(todoRepository).findById(1L);
+        verify(todoRepository).save(testTodo);
     }
-
+    
     @Test
     @DisplayName("투두 수정 실패 - 존재하지 않는 ID")
-    void updateTodo_NotFound() {
+    void updateTodo_Fail_NotFound() {
         // given
-        when(todoRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> todoService.updateTodo(999L, updateRequest));
+        when(todoRepository.findById(999L)).thenReturn(Optional.empty());
         
-        assertEquals("Todo not found with id: 999", exception.getMessage());
-        verify(todoRepository, times(1)).findById(999L);
+        // when & then
+        assertThatThrownBy(() -> todoService.updateTodo(999L, updateDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Todo not found with id: 999");
+        
+        verify(todoRepository).findById(999L);
         verify(todoRepository, never()).save(any(Todo.class));
     }
-
+    
     @Test
     @DisplayName("투두 삭제 성공")
     void deleteTodo_Success() {
         // given
         when(todoRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(todoRepository).deleteById(1L);
-
+        
         // when
-        assertDoesNotThrow(() -> todoService.deleteTodo(1L));
-
+        todoService.deleteTodo(1L);
+        
         // then
-        verify(todoRepository, times(1)).existsById(1L);
-        verify(todoRepository, times(1)).deleteById(1L);
+        verify(todoRepository).existsById(1L);
+        verify(todoRepository).deleteById(1L);
     }
-
+    
     @Test
     @DisplayName("투두 삭제 실패 - 존재하지 않는 ID")
-    void deleteTodo_NotFound() {
+    void deleteTodo_Fail_NotFound() {
         // given
-        when(todoRepository.existsById(anyLong())).thenReturn(false);
-
-        // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> todoService.deleteTodo(999L));
+        when(todoRepository.existsById(999L)).thenReturn(false);
         
-        assertEquals("Todo not found with id: 999", exception.getMessage());
-        verify(todoRepository, times(1)).existsById(999L);
-        verify(todoRepository, never()).deleteById(anyLong());
+        // when & then
+        assertThatThrownBy(() -> todoService.deleteTodo(999L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Todo not found with id: 999");
+        
+        verify(todoRepository).existsById(999L);
+        verify(todoRepository, never()).deleteById(any());
     }
 }

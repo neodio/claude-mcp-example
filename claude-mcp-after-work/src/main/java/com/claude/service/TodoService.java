@@ -1,14 +1,15 @@
 package com.claude.service;
 
-import com.claude.dto.TodoCreateRequest;
-import com.claude.dto.TodoResponse;
-import com.claude.dto.TodoUpdateRequest;
+import com.claude.dto.TodoCreateDto;
+import com.claude.dto.TodoResponseDto;
+import com.claude.dto.TodoUpdateDto;
 import com.claude.entity.Todo;
 import com.claude.repository.TodoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,46 +23,56 @@ public class TodoService {
     }
     
     // 투두 생성
-    public TodoResponse createTodo(TodoCreateRequest request) {
-        Todo todo = new Todo(request.getTitle(), request.getDescription());
+    public TodoResponseDto createTodo(TodoCreateDto createDto) {
+        if (createDto.getTitle() == null || createDto.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Title is required");
+        }
+        
+        Todo todo = new Todo(createDto.getTitle(), createDto.getDescription());
         Todo savedTodo = todoRepository.save(todo);
-        return new TodoResponse(savedTodo);
+        return new TodoResponseDto(savedTodo);
     }
     
     // 전체 투두 조회
-    public List<TodoResponse> getAllTodos() {
+    public List<TodoResponseDto> getAllTodos() {
         return todoRepository.findAll()
                 .stream()
-                .map(TodoResponse::new)
+                .map(TodoResponseDto::new)
                 .collect(Collectors.toList());
     }
     
     // 단건 투두 조회
-    public TodoResponse getTodoById(Long id) {
+    public TodoResponseDto getTodoById(Long id) {
         Todo todo = todoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Todo not found with id: " + id));
-        return new TodoResponse(todo);
+                .orElseThrow(() -> new IllegalArgumentException("Todo not found with id: " + id));
+        return new TodoResponseDto(todo);
     }
     
     // 투두 수정
-    public TodoResponse updateTodo(Long id, TodoUpdateRequest request) {
+    public TodoResponseDto updateTodo(Long id, TodoUpdateDto updateDto) {
         Todo todo = todoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Todo not found with id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Todo not found with id: " + id));
         
-        todo.setTitle(request.getTitle());
-        todo.setDescription(request.getDescription());
-        if (request.getIsDone() != null) {
-            todo.setIsDone(request.getIsDone());
+        if (updateDto.getTitle() != null && !updateDto.getTitle().trim().isEmpty()) {
+            todo.setTitle(updateDto.getTitle());
+        }
+        
+        if (updateDto.getDescription() != null) {
+            todo.setDescription(updateDto.getDescription());
+        }
+        
+        if (updateDto.getIsDone() != null) {
+            todo.setIsDone(updateDto.getIsDone());
         }
         
         Todo updatedTodo = todoRepository.save(todo);
-        return new TodoResponse(updatedTodo);
+        return new TodoResponseDto(updatedTodo);
     }
     
     // 투두 삭제
     public void deleteTodo(Long id) {
         if (!todoRepository.existsById(id)) {
-            throw new RuntimeException("Todo not found with id: " + id);
+            throw new IllegalArgumentException("Todo not found with id: " + id);
         }
         todoRepository.deleteById(id);
     }

@@ -1,7 +1,7 @@
 package com.claude.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "todos")
@@ -12,26 +12,31 @@ public class Todo {
     private Long id;
     
     @Column(nullable = false)
-    @NotBlank(message = "Title is required")
     private String title;
     
-    @Column(length = 500)
+    @Column(columnDefinition = "TEXT")
     private String description;
     
     @Column(nullable = false)
     private Boolean isDone = false;
     
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+    
     // 기본 생성자
-    public Todo() {}
+    public Todo() {
+        this.createdAt = LocalDateTime.now();
+    }
     
     // 생성자
     public Todo(String title, String description) {
         this.title = title;
         this.description = description;
         this.isDone = false;
+        this.createdAt = LocalDateTime.now();
     }
     
-    // Getters and Setters
+    // Getter & Setter
     public Long getId() {
         return id;
     }
@@ -62,5 +67,21 @@ public class Todo {
     
     public void setIsDone(Boolean isDone) {
         this.isDone = isDone;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    // JPA 생명주기 콜백
+    @PrePersist
+    protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
     }
 }

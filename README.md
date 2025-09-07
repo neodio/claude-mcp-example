@@ -48,9 +48,6 @@ MCP는 "대규모 언어 모델이 외부 데이터와 시스템을 더 효과�
 
 <img src="image/develop.png"  width="450"/><br>
 
-### figma 예시
-<img src="image/figma.png"  width="750"/><br>
-
 
 ## 실전 Claude + IntelliJ MCP로 연동 후 Todo 리스트 만들기
 
@@ -135,6 +132,11 @@ Claude 에게 시킬 프롬포트
 - 로그인된 유저의 닉네임을 list.html에 출력해줘
 - 로그인하지 않은 사용자가 /todos 등에 접근하면 /login으로 리다이렉트
 ```
+
+###
+
+### figma 예시
+<img src="image/figma.png"  width="750"/><br>
 
 # 강의자료 참고
 - [강의 링크](https://www.inflearn.com/course/claude-intellij-mcp%EC%A0%95%EB%B3%B5)
